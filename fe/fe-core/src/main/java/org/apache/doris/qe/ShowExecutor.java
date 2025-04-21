@@ -54,6 +54,7 @@ import org.apache.doris.analysis.ShowCreateMTMVStmt;
 import org.apache.doris.analysis.ShowCreateMaterializedViewStmt;
 import org.apache.doris.analysis.ShowCreateRepositoryStmt;
 import org.apache.doris.analysis.ShowCreateRoutineLoadStmt;
+import org.apache.doris.analysis.ShowCreateStorageVaultStmt;
 import org.apache.doris.analysis.ShowCreateTableStmt;
 import org.apache.doris.analysis.ShowDataSkewStmt;
 import org.apache.doris.analysis.ShowDataStmt;
@@ -507,11 +508,32 @@ public class ShowExecutor {
             handleShowStorageVault();
         } else if (stmt instanceof ShowCloudWarmUpStmt) {
             handleShowCloudWarmUpJob();
+        } else if (stmt instanceof ShowCreateStorageVaultStmt) {
+            handleShowCreateStorageVault();
         } else {
             handleEmtpy();
         }
 
         return resultSet;
+    }
+
+    private void handleShowCreateStorageVault()  throws AnalysisException {
+        ShowCreateStorageVaultStmt showStmt = (ShowCreateStorageVaultStmt) stmt;
+        List<List<String>> rows = new ArrayList<>();
+        try {
+            Cloud.GetObjStoreInfoResponse resp = MetaServiceProxy.getInstance()
+                    .getObjStoreInfo(Cloud.GetObjStoreInfoRequest.newBuilder().build());
+            List<Cloud.StorageVaultPB> storageVaults = resp.getStorageVaultList();
+            for (Cloud.StorageVaultPB vault : storageVaults) {
+                if (vault.getName().equals(showStmt.getName())){
+                    String createStmt = StorageVault.generateCreateStorageVaultStmt(vault);
+                    rows.add(Arrays.asList(vault.getName(), createStmt));
+                }
+            }
+        } catch (RpcException e) {
+            throw new AnalysisException(e.getMessage());
+        }
+        resultSet = new ShowResultSet(showStmt.getMetaData(), rows);
     }
 
     private void handleShowRollup() {

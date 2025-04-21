@@ -20,6 +20,8 @@ package org.apache.doris.catalog;
 import org.apache.doris.analysis.CreateResourceStmt;
 import org.apache.doris.analysis.CreateStorageVaultStmt;
 import org.apache.doris.cloud.proto.Cloud;
+import org.apache.doris.cloud.proto.Cloud.HdfsBuildConf;
+import org.apache.doris.cloud.proto.Cloud.HdfsBuildConf.HdfsConfKVPair;
 import org.apache.doris.common.AnalysisException;
 import org.apache.doris.common.DdlException;
 import org.apache.doris.common.UserException;
@@ -249,5 +251,40 @@ public abstract class StorageVault {
                 defaultVaultRow.set(isDefaultIndex, "true");
             }
         }
+    }
+
+    public static final ShowResultSetMetaData CREATE_STORAGE_VAULT_META_DATA =
+            ShowResultSetMetaData.builder()
+                    .addColumn(new Column("VaultName", ScalarType.createVarchar(128)))
+                    .addColumn(new Column("CreateStmt", ScalarType.createVarchar(65535)))
+                    .build();
+
+    public static String generateCreateStorageVaultStmt(Cloud.StorageVaultPB vault) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("CREATE STORAGE VAULT '").append(vault.getName()).append("' ");
+        sb.append("PROPERTIES(");
+
+        if (vault.hasHdfsInfo()) {
+            Cloud.HdfsVaultInfo hdfsInfo = vault.getHdfsInfo();
+            sb.append("'type' = 'hdfs'");
+            HdfsBuildConf buildConf = hdfsInfo.getBuildConf();
+            for (HdfsConfKVPair hdfsConfKVPair : buildConf.getHdfsConfsList()) {
+                if ("fs.defaultFS".equals(hdfsConfKVPair.getKey())) {
+                    sb.append("'hdfs.uri' = '").append(hdfsConfKVPair.getValue()).append("'");
+                }
+                if ("hdfs.nameservices".equals(hdfsConfKVPair.getKey())) {
+                    sb.append("'hdfs.nameservices' = '").append(hdfsConfKVPair.getValue()).append("'");
+                }
+                if ("hdfs.username".equals(hdfsConfKVPair.getKey())) {
+                    sb.append("'hdfs.username' = '").append(hdfsConfKVPair.getValue()).append("'");
+                }
+            }
+        } else if (vault.hasObjInfo()) {
+            Cloud.ObjectStoreInfoPB objInfo = vault.getObjInfo();
+            sb.append("'type' = 's3', 'bucket' = '").append(objInfo.getBucket()).append("'");
+        }
+
+        sb.append(")");
+        return sb.toString();
     }
 }

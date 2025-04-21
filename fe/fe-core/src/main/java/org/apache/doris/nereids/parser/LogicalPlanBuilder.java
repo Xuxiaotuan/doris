@@ -318,6 +318,7 @@ import org.apache.doris.nereids.DorisParser.ShowCreateMTMVContext;
 import org.apache.doris.nereids.DorisParser.ShowCreateMaterializedViewContext;
 import org.apache.doris.nereids.DorisParser.ShowCreateProcedureContext;
 import org.apache.doris.nereids.DorisParser.ShowCreateRepositoryContext;
+import org.apache.doris.nereids.DorisParser.ShowCreateStorageVaultContext;
 import org.apache.doris.nereids.DorisParser.ShowCreateTableContext;
 import org.apache.doris.nereids.DorisParser.ShowCreateViewContext;
 import org.apache.doris.nereids.DorisParser.ShowDataSkewContext;
@@ -644,6 +645,7 @@ import org.apache.doris.nereids.trees.plans.commands.ShowCreateMTMVCommand;
 import org.apache.doris.nereids.trees.plans.commands.ShowCreateMaterializedViewCommand;
 import org.apache.doris.nereids.trees.plans.commands.ShowCreateProcedureCommand;
 import org.apache.doris.nereids.trees.plans.commands.ShowCreateRepositoryCommand;
+import org.apache.doris.nereids.trees.plans.commands.ShowCreateStorageVaultCommand;
 import org.apache.doris.nereids.trees.plans.commands.ShowCreateTableCommand;
 import org.apache.doris.nereids.trees.plans.commands.ShowCreateViewCommand;
 import org.apache.doris.nereids.trees.plans.commands.ShowDataCommand;
@@ -5309,6 +5311,12 @@ public class LogicalPlanBuilder extends DorisParserBaseVisitor<Object> {
     public LogicalPlan visitShowCreateView(ShowCreateViewContext ctx) {
         List<String> nameParts = visitMultipartIdentifier(ctx.name);
         return new ShowCreateViewCommand(new TableNameInfo(nameParts));
+    }
+
+    @Override
+    public LogicalPlan visitShowCreateStorageVault(ShowCreateStorageVaultContext ctx) {
+        List<String> nameParts = visitMultipartIdentifier(ctx.name);
+        return new ShowCreateStorageVaultCommand(nameParts.get(0));
     }
 
     @Override

@@ -283,6 +283,7 @@ supportedDropStatement
 supportedShowStatement
     : SHOW statementScope? VARIABLES wildWhere?                         #showVariables
     | SHOW AUTHORS                                                                  #showAuthors
+    | SHOW CREATE STORAGE VAULT name=multipartIdentifier                            #showCreateStorageVault
     | SHOW CREATE (DATABASE | SCHEMA) name=multipartIdentifier                      #showCreateDatabase
     | SHOW BACKUP ((FROM | IN) database=identifier)? wildWhere?                     #showBackup
     | SHOW BROKER                                                                   #showBroker

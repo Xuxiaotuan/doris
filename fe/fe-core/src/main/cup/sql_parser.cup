@@ -4253,6 +4253,10 @@ show_stmt ::=
     {:
         RESULT = new ShowStorageVaultStmt();
     :}
+    | KW_SHOW KW_CREATE KW_STORAGE KW_VAULT ident_or_text:name
+    {:
+        RESULT = new ShowCreateStorageVaultStmt(name);
+    :}
     ;
 
 show_param ::=
@@ -8778,3 +8782,4 @@ time_unit ::=
 //     /* empty */
 //     | charset old_or_new_charset_name_or_default
 //     ;
+`
