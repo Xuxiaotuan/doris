@@ -517,7 +517,7 @@ public class ShowExecutor {
         return resultSet;
     }
 
-    private void handleShowCreateStorageVault()  throws AnalysisException {
+    private void handleShowCreateStorageVault() throws AnalysisException {
         ShowCreateStorageVaultStmt showStmt = (ShowCreateStorageVaultStmt) stmt;
         List<List<String>> rows = new ArrayList<>();
         try {
@@ -525,7 +525,7 @@ public class ShowExecutor {
                     .getObjStoreInfo(Cloud.GetObjStoreInfoRequest.newBuilder().build());
             List<Cloud.StorageVaultPB> storageVaults = resp.getStorageVaultList();
             for (Cloud.StorageVaultPB vault : storageVaults) {
-                if (vault.getName().equals(showStmt.getName())){
+                if (vault.getName().equals(showStmt.getName())) {
                     String createStmt = StorageVault.generateCreateStorageVaultStmt(vault);
                     rows.add(Arrays.asList(vault.getName(), createStmt));
                 }

@@ -621,8 +621,8 @@ public interface CommandVisitor<R, C> {
         return visitCommand(showCreateViewCommand, context);
     }
 
-    default R visitShowCreateStorageVaultCommand(ShowCreateStorageVaultCommand showCreateStorageVaultCommand, C context) {
-        return visitCommand(showCreateStorageVaultCommand, context);
+    default R visitShowCreateStorageVaultCommand(ShowCreateStorageVaultCommand showCommand, C context) {
+        return visitCommand(showCommand, context);
     }
 
     default R visitAlterRoleCommand(AlterRoleCommand alterRoleCommand, C context) {

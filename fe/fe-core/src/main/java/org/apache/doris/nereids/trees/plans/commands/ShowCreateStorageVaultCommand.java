@@ -63,7 +63,7 @@ public class ShowCreateStorageVaultCommand extends ShowCommand {
                     .getObjStoreInfo(Cloud.GetObjStoreInfoRequest.newBuilder().build());
             List<Cloud.StorageVaultPB> storageVaults = resp.getStorageVaultList();
             for (Cloud.StorageVaultPB vault : storageVaults) {
-                if (vault.getName().equals(name)){
+                if (vault.getName().equals(name)) {
                     String createStmt = StorageVault.generateCreateStorageVaultStmt(vault);
                     rows.add(Arrays.asList(vault.getName(), createStmt));
                 }

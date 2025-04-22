@@ -35,12 +35,12 @@ public class ShowCreateStorageVaultStmt extends ShowStmt implements NotFallbackI
 
     public final String name;
 
-    public String getName() {
-        return name;
-    }
-
     public ShowCreateStorageVaultStmt(String name) {
         this.name = name;
+    }
+
+    public String getName() {
+        return name;
     }
 
     @Override
