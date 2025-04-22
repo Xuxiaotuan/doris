@@ -519,21 +519,23 @@ public class ShowExecutor {
 
     private void handleShowCreateStorageVault() throws AnalysisException {
         ShowCreateStorageVaultStmt showStmt = (ShowCreateStorageVaultStmt) stmt;
-        List<List<String>> rows = new ArrayList<>();
+        String targetVaultName = showStmt.getName();
+        List<List<String>> resultRows = new ArrayList<>();
         try {
-            Cloud.GetObjStoreInfoResponse resp = MetaServiceProxy.getInstance()
+            Cloud.GetObjStoreInfoResponse response = MetaServiceProxy.getInstance()
                     .getObjStoreInfo(Cloud.GetObjStoreInfoRequest.newBuilder().build());
-            List<Cloud.StorageVaultPB> storageVaults = resp.getStorageVaultList();
-            for (Cloud.StorageVaultPB vault : storageVaults) {
-                if (vault.getName().equals(showStmt.getName())) {
-                    String createStmt = StorageVault.generateCreateStorageVaultStmt(vault);
-                    rows.add(Arrays.asList(vault.getName(), createStmt));
-                }
+            Optional<Cloud.StorageVaultPB> matchedVault = response.getStorageVaultList().stream()
+                    .filter(vault -> vault.getName().equals(targetVaultName))
+                    .findFirst();
+            if (!matchedVault.isPresent()) {
+                throw new AnalysisException("Storage vault '" + targetVaultName + "' does not exist");
             }
+            String createStmt = StorageVault.generateCreateStorageVaultStmt(matchedVault.get());
+            resultRows.add(Arrays.asList(targetVaultName, createStmt));
         } catch (RpcException e) {
-            throw new AnalysisException(e.getMessage());
+            throw new AnalysisException("Failed to get storage vault info: " + e.getMessage());
         }
-        resultSet = new ShowResultSet(showStmt.getMetaData(), rows);
+        resultSet = new ShowResultSet(showStmt.getMetaData(), resultRows);
     }
 
     private void handleShowRollup() {

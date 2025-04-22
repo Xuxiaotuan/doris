@@ -291,7 +291,7 @@ public abstract class StorageVault {
                 .append(objInfo.getAk())
                 .append("'")
                 .append(" 'AWS_SECRET_KEY' = 'xxxxxxx'")
-                .append(" 'AWS_REGION'  = '")
+                .append(" 'AWS_REGION' = '")
                 .append(objInfo.getRegion()).append("'");
         }
 

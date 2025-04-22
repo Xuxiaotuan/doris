@@ -32,6 +32,7 @@ import org.apache.doris.rpc.RpcException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents the command for SHOW CREATE VIEW.
@@ -57,22 +58,23 @@ public class ShowCreateStorageVaultCommand extends ShowCommand {
 
     @Override
     public ShowResultSet doRun(ConnectContext ctx, StmtExecutor executor) throws Exception {
-        List<List<String>> rows = new ArrayList<>();
+        List<List<String>> resultRows = new ArrayList<>();
         try {
-            Cloud.GetObjStoreInfoResponse resp = MetaServiceProxy.getInstance()
+            Cloud.GetObjStoreInfoResponse response = MetaServiceProxy.getInstance()
                     .getObjStoreInfo(Cloud.GetObjStoreInfoRequest.newBuilder().build());
-            List<Cloud.StorageVaultPB> storageVaults = resp.getStorageVaultList();
-            for (Cloud.StorageVaultPB vault : storageVaults) {
-                if (vault.getName().equals(name)) {
-                    String createStmt = StorageVault.generateCreateStorageVaultStmt(vault);
-                    rows.add(Arrays.asList(vault.getName(), createStmt));
-                }
+            Optional<Cloud.StorageVaultPB> matchedVault = response.getStorageVaultList().stream()
+                    .filter(vault -> vault.getName().equals(name))
+                    .findFirst();
+            if (!matchedVault.isPresent()) {
+                throw new AnalysisException("Storage vault '" + name + "' does not exist");
             }
+            String createStmt = StorageVault.generateCreateStorageVaultStmt(matchedVault.get());
+            resultRows.add(Arrays.asList(name, createStmt));
         } catch (RpcException e) {
             throw new AnalysisException(e.getMessage());
         }
 
-        return new ShowResultSet(getMetaData(), rows);
+        return new ShowResultSet(getMetaData(), resultRows);
     }
 
 }
