@@ -270,18 +270,29 @@ public abstract class StorageVault {
             HdfsBuildConf buildConf = hdfsInfo.getBuildConf();
             for (HdfsConfKVPair hdfsConfKVPair : buildConf.getHdfsConfsList()) {
                 if ("fs.defaultFS".equals(hdfsConfKVPair.getKey())) {
-                    sb.append("'hdfs.uri' = '").append(hdfsConfKVPair.getValue()).append("'");
+                    sb.append(" 'hdfs.uri' = '").append(hdfsConfKVPair.getValue()).append("'");
                 }
                 if ("hdfs.nameservices".equals(hdfsConfKVPair.getKey())) {
-                    sb.append("'hdfs.nameservices' = '").append(hdfsConfKVPair.getValue()).append("'");
+                    sb.append(" 'hdfs.nameservices' = '").append(hdfsConfKVPair.getValue()).append("'");
                 }
                 if ("hdfs.username".equals(hdfsConfKVPair.getKey())) {
-                    sb.append("'hdfs.username' = '").append(hdfsConfKVPair.getValue()).append("'");
+                    sb.append(" 'hdfs.username' = '").append(hdfsConfKVPair.getValue()).append("'");
                 }
             }
         } else if (vault.hasObjInfo()) {
             Cloud.ObjectStoreInfoPB objInfo = vault.getObjInfo();
-            sb.append("'type' = 's3', 'bucket' = '").append(objInfo.getBucket()).append("'");
+            sb.append("'type' = 's3', 'bucket' = '")
+                .append(objInfo.getBucket())
+                .append("'")
+                .append(" 'AWS_ENDPOINT' = '")
+                .append(objInfo.getEndpoint())
+                .append("'")
+                .append(" 'AWS_ACCESS_KEY' = '")
+                .append(objInfo.getAk())
+                .append("'")
+                .append(" 'AWS_SECRET_KEY' = 'xxxxxxx'")
+                .append(" 'AWS_REGION'  = '")
+                .append(objInfo.getRegion()).append("'");
         }
 
         sb.append(")");
