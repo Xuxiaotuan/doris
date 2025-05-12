@@ -14,21 +14,17 @@
 // KIND, either express or implied.  See the License for the
 // specific language governing permissions and limitations
 // under the License.
-// This file is copied from
-// https://github.com/ClickHouse/ClickHouse/blob/master/src/Commom/StringUtils/StringUtils.cpp
-// and modified by Doris
 
-#include "vec/common/string_utils/string_utils.h"
+suite("test_nereids_show_grants") {
+    String dbName = "show_grants_db"
+    sql "CREATE USER 'aaaaa'@'%' IDENTIFIED BY '12345';"
+    sql "CREATE USER 'zzzzz'@'%' IDENTIFIED BY '12345';"
+    sql "CREATE USER 'aaaaa'@'192.168.%' IDENTIFIED BY '12345';"
 
-namespace doris::vectorized::detail {
+    checkNereidsExecute("show all grants")
 
-bool starts_with(const std::string& s, const char* prefix, size_t prefix_size) {
-    return s.size() >= prefix_size && 0 == memcmp(s.data(), prefix, prefix_size);
+    def res = sql """show all grants"""
+    assertEquals("'aaaaa'@'%'", res.get(0).get(0))
+    assertEquals("'aaaaa'@'192.168.%'", res.get(1).get(0))
+    assertEquals("'zzzzz'@'%'", res.get(res.size() - 1).get(0))
 }
-
-bool ends_with(const std::string& s, const char* suffix, size_t suffix_size) {
-    return s.size() >= suffix_size &&
-           0 == memcmp(s.data() + s.size() - suffix_size, suffix, suffix_size);
-}
-
-} // namespace doris::vectorized::detail
